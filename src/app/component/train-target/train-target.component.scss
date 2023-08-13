@@ -1,0 +1,17 @@
+.target {
+  background-color: rgb(78, 128, 227);
+  position: absolute;
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+  box-shadow: 0 0 20px 10px white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.point {
+  background-color: rgb(8, 11, 16);
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+}

@@ -1,0 +1,17 @@
+<div *ngIf="!startTraining else onlytrainingTarget" class="row h-100 w-100">
+        <div class="col-2 align-self-end" >                      
+            <div class="row" >    
+                <button (click)="createDataset()" color="primary" mat-raised-button>Начать обучение</button>   
+                <button (click)="test()" color="primary" mat-raised-button>Тест</button>     
+                <div class="h-25" >    
+                    <camera></camera>               
+                </div>    
+                <train-target></train-target>              
+            </div>   
+        </div>
+        <div class="col-6">
+        </div>
+</div>
+<ng-template #onlytrainingTarget>  
+    <train-target></train-target>
+</ng-template> 
