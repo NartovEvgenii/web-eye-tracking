@@ -13,7 +13,7 @@ export class TrainTargeComponent implements OnInit {
   private _left: number = 0;
   private _top: number = 0;
 
-  moveId: any;
+  moveIntervalId: any;
 
   currentDirection: number = 0;
   
@@ -45,7 +45,7 @@ export class TrainTargeComponent implements OnInit {
     this.top = 0;
     this.currentTrainData.startTraining = true;
     this.directionArr[0] = true;
-    this.moveId = setInterval(() => this.moveTargetByDirection(), 80);
+    this.moveIntervalId = setInterval(() => this.moveTargetByDirection(), 80);
   }
 
 
@@ -104,7 +104,8 @@ export class TrainTargeComponent implements OnInit {
         }
       }
       if(this.directionArr.every(element => element === false)){
-        clearInterval(this.moveId);
+        this.currentTrainData.startTraining = false;
+        clearInterval(this.moveIntervalId);
       }
     }
   }
@@ -175,11 +176,11 @@ export class TrainTargeComponent implements OnInit {
   }
 
   private setCurrDataTargetX(value: number) {
-    this.currentTrainData.targetX = value + this.target.nativeElement.offsetWidth / 2;
+    this.currentTrainData.targetX = (value + this.target.nativeElement.offsetWidth / 2) / window.innerWidth;
   }
 
   private setCurrDataTargetY(value: number) {
-    this.currentTrainData.targetY = value + this.target.nativeElement.offsetHeight / 2;
+    this.currentTrainData.targetY = (value + this.target.nativeElement.offsetHeight / 2) / window.innerHeight;
   }
   
 

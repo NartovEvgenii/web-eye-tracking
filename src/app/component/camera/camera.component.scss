@@ -1,12 +1,9 @@
 :host {
   display: block;
-  left: 0;
   width: 400px;
   height: 300px;
 }
 
-#webcam, #overlay {
+#webcam, #overlay, #eyes {
     position: absolute;
-    top: 0;
-    left: 0;
   }

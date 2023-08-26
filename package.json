@@ -21,7 +21,7 @@
     "@angular/platform-browser-dynamic": "^16.0.0",
     "@angular/router": "^16.0.0",
     "@tensorflow-models/mobilenet": "^2.1.1",
-    "@tensorflow/tfjs": "^4.10.0",
+    "@tensorflow/tfjs": "^3.1.0",
     "@tensorflow/tfjs-vis": "^1.5.1",
     "bootstrap": "^5.3.1",
     "ngx-webcam": "^0.4.1",

@@ -8,13 +8,15 @@ import { TrainTargeComponent } from './component/train-target/train-target.compo
 import { HomePage } from './page/home/home.page';
 import {MatButtonModule} from '@angular/material/button';
 import { DatasetService } from './features.service/dataset';
+import { EyeTargeComponent } from './component/eye-target/eye-target.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomePage,
     CameraComponent,
-    TrainTargeComponent
+    TrainTargeComponent,
+    EyeTargeComponent
   ],
   imports: [
     BrowserModule,

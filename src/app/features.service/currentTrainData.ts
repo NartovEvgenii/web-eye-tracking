@@ -1,12 +1,13 @@
-import { Injectable, NgModule } from "@angular/core";
+import { Injectable } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
 
 @Injectable({
     providedIn: 'root',
    })
 export class CurrentTrainData {
 
-    private _startTraining: boolean = false;
-
+    startTraining$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    
     private _image: HTMLCanvasElement | undefined;
 
     private _targetX: number = 0;
@@ -16,6 +17,8 @@ export class CurrentTrainData {
     private _middleEyeY: number = 0;
     private _rectWidthEye: number = 0;
     private _rectHeightEye: number = 0;
+    private _widthEye: number = 0;
+    private _heightEye: number = 0;
 
 
     public get image(): HTMLCanvasElement {
@@ -67,12 +70,24 @@ export class CurrentTrainData {
         this._rectHeightEye = value;
     }
 
-    public get startTraining(): boolean {
-        return this._startTraining;
-    }
     public set startTraining(value: boolean) {
-        this._startTraining = value;
+        this.startTraining$.next(value);
+    }
+    
+    public get widthEye(): number {
+        return this._widthEye;
+    }
+    
+    public set widthEye(value: number) {
+        this._widthEye = value;
+    }
+    
+    public get heightEye(): number {
+        return this._heightEye;
     }
 
+    public set heightEye(value: number) {
+        this._heightEye = value;
+    }
 
 }

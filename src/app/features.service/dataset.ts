@@ -5,7 +5,7 @@ import { Rank, Tensor } from "@tensorflow/tfjs";
 
 interface DataItem {
   n: number;
-  x: any[] | null;
+  x: Tensor<Rank>[] | null;
   y: Tensor<Rank> | null;
 }
 
@@ -17,23 +17,23 @@ interface DataItem {
     train: DataItem  = {n: 0,x: null,y: null };
 
     val: DataItem  = {n: 0,x: null,y: null };
+
+    eyeHeight:number = 0; 
+    eyeWidth: number = 0;
     
     public addDataToDataset(currentTrainData: CurrentTrainData) {
       tf.tidy(() => {
-        const img = this.batchImage(currentTrainData);
+        const img = this.batchImage(currentTrainData.image);
         const targetPos = [currentTrainData.targetX, currentTrainData.targetY];
-        const metaInfos = tf.keep(this.getMetaInfos(currentTrainData));
+        const metaInfos = tf.keep(this.getMetaInfosByCurr(currentTrainData));
         console.log(currentTrainData);
         this.addExample(img, metaInfos, targetPos);
-        console.log("ok");
-        console.log(this.train);
-        console.log(this.val);
       });
     }
 
-    private batchImage(currentTrainData: CurrentTrainData) {
+    public batchImage(image: HTMLCanvasElement) {
       // Capture the current image in the eyes canvas as a tensor.
-      const img = currentTrainData.image;
+      const img = image;
       return tf.tidy(function() {
         const image = tf.browser.fromPixels(img);
         const batchedImage = image.expandDims(0);
@@ -45,13 +45,18 @@ interface DataItem {
     }
 
     
-    private getMetaInfos(currentTrainData: CurrentTrainData) {
+    private getMetaInfosByCurr(currentTrainData: CurrentTrainData) {
       let x = currentTrainData.middleEyeX;
       let y = currentTrainData.middleEyeY;
   
       const rectWidth  = currentTrainData.rectWidthEye;
       const rectHeight = currentTrainData.rectHeightEye;
+      console.log([x, y, rectWidth, rectHeight]);
   
+      return this.getMetaInfos(x, y, rectWidth, rectHeight);
+    }
+
+    public getMetaInfos(x:number, y:number, rectWidth:number, rectHeight:number) {  
       return tf.tidy(() => {
         return tf.tensor1d([x, y, rectWidth, rectHeight]).expandDims(0);
       });
@@ -71,7 +76,7 @@ interface DataItem {
   
     }
 
-    private async convertImage(image:any) {
+    public async convertImage(image:any) {
       // Convert to grayscale and add spatial info
       const imageShape = image.shape;
       const imageArray = await image.array();
