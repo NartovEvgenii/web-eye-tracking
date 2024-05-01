@@ -20,12 +20,21 @@ export class CurrentTrainData {
     private _widthEye: number = 0;
     private _heightEye: number = 0;
 
+    private _fullimage: any | undefined;
+
 
     public get image(): HTMLCanvasElement {
         return this._image!;
     }
     public set image(value: HTMLCanvasElement) {
         this._image = value;
+    }
+
+    public get fullimage(): any {
+        return this._fullimage!;
+    }
+    public set fullimage(value: any) {
+        this._fullimage = value;
     }
 
     public get targetX(): number {

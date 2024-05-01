@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { WebcamImage } from 'ngx-webcam';
 
 @Component({
   selector: 'app-root',

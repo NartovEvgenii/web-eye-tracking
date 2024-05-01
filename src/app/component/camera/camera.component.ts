@@ -17,9 +17,11 @@ export class CameraComponent implements OnInit {
   private overlay: any;
   private overlayCC: any;
 
-  private eyesCanvas: any;
+  private eyesCanvas!: HTMLCanvasElement;
   private eyesCtx: any;
   private currentEyeRect: any;
+
+  private oneEyeCtx: any;
   
   constructor(private currentTrainData: CurrentTrainData,
               private eyeTrack: EyeTrack,
@@ -32,6 +34,9 @@ export class CameraComponent implements OnInit {
 
     this.eyesCanvas = document.getElementById('eyes') as HTMLCanvasElement;
     this.eyesCtx = this.eyesCanvas.getContext('2d', { willReadFrequently: true });
+
+    let oneeyeCanvas = document.getElementById('oneeye') as HTMLCanvasElement;
+    this.oneEyeCtx = oneeyeCanvas.getContext('2d', { willReadFrequently: true });
 
     this.datasetService.eyeWidth = this.eyesCanvas.width;
     this.datasetService.eyeHeight = this.eyesCanvas.height;
@@ -78,16 +83,13 @@ export class CameraComponent implements OnInit {
     }
 
     private startVideo() {
-      // start trackings
       this.ctrack.start(this.video);
-      // start loop to draw face
       this.currentTrainData.widthEye = this.eyesCanvas.width;
       this.currentTrainData.heightEye = this.eyesCanvas.height;
       this.positionLoop();
     }
 
     private positionLoop() {
-      // Check if a face is detected, and if so, track it.
       requestAnimationFrame(this.positionLoop.bind(this));
       const currentPosition = this.ctrack.getCurrentPosition();
       this.overlayCC.clearRect(
@@ -112,7 +114,12 @@ export class CameraComponent implements OnInit {
       const rect = this.getEyesRect(position);
       this.currentEyeRect = rect;
 
-      this.overlayCC.strokeStyle = 'red';
+      this.overlayCC.strokeStyle = 'red';   
+      this.overlayCC.drawImage(
+        this.video,
+        0,
+        0,
+      );   
       this.overlayCC.strokeRect(rect[0], rect[1], rect[2], rect[3]);
       this.eyesCtx.drawImage(
         this.video,
@@ -125,6 +132,11 @@ export class CameraComponent implements OnInit {
         this.eyesCanvas.width,
         this.eyesCanvas.height,
       );
+      this.oneEyeCtx.putImageData(this.imageToYCbCr(
+                                  this.eyesCtx.getImageData(0, 0, this.eyesCanvas.width / 2, this.eyesCanvas.height)), 
+      0, 0);
+      const img = this.overlay as HTMLCanvasElement;
+      this.currentTrainData.fullimage = img.toDataURL("image/png");
     }
 
     private getEyesRect(position:any) {
@@ -178,5 +190,34 @@ export class CameraComponent implements OnInit {
       const image = this.eyesCanvas;
       this.eyeTrack.updatePosition(image, metaInfos);
     }
+
+   public imageToYCbCr(imageData:any){
+    const data = imageData.data;
+    let black = 0;
+    let white = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const R = data[i];
+      const G = data[i + 1];
+      const B = data[i + 2];
+  
+      // Convert RGB to YCbCr
+      const Y = 0.299 * R + 0.587 * G + 0.114 * B;
+      const Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B;
+      const Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B;
+  
+      const avg = (Y + Cb + Cr) / 3;
+      const color = avg > 110 ? 255 : 0;
+      if (avg > 110) {
+        black++;
+      } else {
+        white++;
+      }
+      data[i] = color;
+      data[i + 1] = color;
+      data[i + 2] = color;
+    }
+    console.log("PERCENT " + (black * 100 / (white + black)));
+    return imageData;
+   }
 
 }

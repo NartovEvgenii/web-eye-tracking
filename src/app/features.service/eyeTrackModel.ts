@@ -33,8 +33,6 @@ export class EyeTrackModel {
         loss: 'meanSquaredError',
       });
       console.log("ok");
-      console.log(this.dataset.train);
-      console.log(this.dataset.val);
 
       let epochsTrained = this.epochsTrained;
       let currentModel = this.currentModel;
@@ -50,12 +48,10 @@ export class EyeTrackModel {
             epochsTrained += 1;
   
             if (logs != undefined &&  logs["val_loss"] < bestValLoss) {
-              // Save model
+              console.log("model save");
               bestEpoch = epoch;
               bestTrainLoss = logs["loss"];
               bestValLoss = logs["val_loss"];
-  
-              // Store best model:
               await currentModel.save(bestModelPath);
             }
   
@@ -64,7 +60,6 @@ export class EyeTrackModel {
           onTrainEnd: async function() {
             console.info('Finished training');
   
-            // Load best model:
             epochsTrained -= epochs - bestEpoch;
             console.info('Loading best epoch:', epochsTrained);
   
@@ -122,5 +117,12 @@ export class EyeTrackModel {
       });
   
       return model;
+    }
+
+    async loadModel(file1:any, file2:any) {
+      this.currentModel = await tf.loadLayersModel(
+        tf.io.browserFiles([file1, file2]),
+      );
+      console.log("upload sussess")
     }
 }

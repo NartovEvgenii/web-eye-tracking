@@ -32,7 +32,6 @@ interface DataItem {
     }
 
     public batchImage(image: HTMLCanvasElement) {
-      // Capture the current image in the eyes canvas as a tensor.
       const img = image;
       return tf.tidy(function() {
         const image = tf.browser.fromPixels(img);
@@ -51,7 +50,6 @@ interface DataItem {
   
       const rectWidth  = currentTrainData.rectWidthEye;
       const rectHeight = currentTrainData.rectHeightEye;
-      console.log([x, y, rectWidth, rectHeight]);
   
       return this.getMetaInfos(x, y, rectWidth, rectHeight);
     }
@@ -62,8 +60,8 @@ interface DataItem {
       });
     }
 
-    private async addExample(image:any, metaInfos:any, target:any) {
-      // Given an image, eye pos and target coordinates, adds them to our dataset.
+    private async addExample(image:Tensor<Rank>, 
+      metaInfos:Tensor<Rank>, target:any) {
       target = tf.keep(
         tf.tidy(function() {
           return tf.tensor1d(target).expandDims(0);
@@ -77,7 +75,6 @@ interface DataItem {
     }
 
     public async convertImage(image:any) {
-      // Convert to grayscale and add spatial info
       const imageShape = image.shape;
       const imageArray = await image.array();
       const w = imageShape[1];
@@ -100,25 +97,20 @@ interface DataItem {
     }
 
     private rgbToGrayscale(imageArray:any, n:any, x:any, y:any) {
-      // Given an rgb array and positions, returns a grayscale value.
-      // Inspired by http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0029740
       let r = (imageArray[n][x][y][0] + 1) / 2;
       let g = (imageArray[n][x][y][1] + 1) / 2;
       let b = (imageArray[n][x][y][2] + 1) / 2;
   
-      // Gamma correction:
       const exponent = 1 / 2.2;
       r = Math.pow(r, exponent);
       g = Math.pow(g, exponent);
       b = Math.pow(b, exponent);
   
-      // Gleam:
       const gleam = (r + g + b) / 3;
       return gleam * 2 - 1;
     }
 
-    private addToDataset(image:any, metaInfos:any, target:any) {
-      // Add the given x, y to either 'train' or 'val'.
+    private addToDataset(image:Tensor<Rank>, metaInfos:Tensor<Rank>, target:Tensor<Rank>) {
       const set = Math.random() < 0.2 ? this.val : this.train;
   
       if (set.x == null) {
@@ -134,10 +126,67 @@ interface DataItem {
         const oldY = set.y;
         set.y = tf.keep(oldY!.concat(target, 0));
   
-        tf.dispose([oldImage, oldEyePos, oldY, target]);
+        tf.dispose([oldImage, oldEyePos, oldY!, target]);
       }
   
       set.n += 1;
     }
+
+    public toJSON() { 
+      console.log("save to json");
+      return {
+        inputWidth: this.eyeWidth,
+        inputHeight: this.eyeHeight,
+        train: {
+          shapes: {
+            x0: this.train.x![0].shape,
+            x1: this.train.x![1].shape,
+            y: this.train.y!.shape,
+          },
+          n: this.train.n,
+          x: this.train.x && [
+            this.tensorToArray(this.train.x[0]),
+            this.tensorToArray(this.train.x[1]),
+          ],
+          y: this.tensorToArray(this.train.y!),
+        },
+        val: {
+          shapes: {
+            x0: this.val.x![0].shape,
+            x1: this.val.x![1].shape,
+            y: this.val.y!.shape,
+          },
+          n: this.val.n,
+          x: this.val.x && [
+            this.tensorToArray(this.val.x[0]),
+            this.tensorToArray(this.val.x[1]),
+          ],
+          y: this.tensorToArray(this.val.y!),
+        },
+      };
+    };
+
+    public fromJSON(data:any) {
+      this.eyeWidth = data.inputWidth;
+      this.eyeHeight = data.inputHeight;
+      this.train.n = data.train.n;
+      this.train.x = data.train.x && [
+        tf.tensor(data.train.x[0], data.train.shapes.x0),
+        tf.tensor(data.train.x[1], data.train.shapes.x1),
+      ];
+      this.train.y = tf.tensor(data.train.y, data.train.shapes.y);
+      this.val.n = data.val.n;
+      this.val.x = data.val.x && [
+        tf.tensor(data.val.x[0], data.val.shapes.x0),
+        tf.tensor(data.val.x[1], data.val.shapes.x1),
+      ];
+      this.val.y = tf.tensor(data.val.y, data.val.shapes.y);
+  
+    };
+
+    private tensorToArray(t:Tensor<Rank>) {
+      const typedArray = t.dataSync();
+      return Array.prototype.slice.call(typedArray);
+    };
     
-  }
+}

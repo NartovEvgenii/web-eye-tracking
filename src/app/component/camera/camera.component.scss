@@ -4,6 +4,10 @@
   height: 300px;
 }
 
-#webcam, #overlay, #eyes {
+#webcam, #overlay, #eyes, #oneeye {
     position: absolute;
+  }
+
+  #oneeye {
+    margin-left: 60px;
   }

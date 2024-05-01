@@ -7,8 +7,8 @@ import { CameraComponent } from './component/camera/camera.component';
 import { TrainTargeComponent } from './component/train-target/train-target.component';
 import { HomePage } from './page/home/home.page';
 import {MatButtonModule} from '@angular/material/button';
-import { DatasetService } from './features.service/dataset';
 import { EyeTargeComponent } from './component/eye-target/eye-target.component';
+import { HeatMapComponent } from './component/heatmap/heatmap.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +16,8 @@ import { EyeTargeComponent } from './component/eye-target/eye-target.component';
     HomePage,
     CameraComponent,
     TrainTargeComponent,
-    EyeTargeComponent
+    EyeTargeComponent,
+    HeatMapComponent
   ],
   imports: [
     BrowserModule,
