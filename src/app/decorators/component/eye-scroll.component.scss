@@ -1,0 +1,26 @@
+#eyeUpScroll {
+  width: 100%;
+  height: 50px;
+  background-color: SkyBlue;
+  border: 4px solid SkyBlue;
+  position: fixed;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 99;
+  opacity: 0.6;
+}
+
+#eyeDownScroll {
+  width: 100%;
+  height: 50px;
+  background-color: SkyBlue;
+  border: 4px solid SkyBlue;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 99;
+  opacity: 0.6;
+}

@@ -101,6 +101,7 @@ export class EyeTrackSelectDirective {
         } else {
           this.hideProgressBar();
           this.cancelDownElement();
+          this.cancelUpElement();
         }
       });
   }

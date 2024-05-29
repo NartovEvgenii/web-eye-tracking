@@ -10,6 +10,7 @@ import { EyeTargeComponent } from './eye-track/component/eye-target/eye-target.c
 import { HeatMapComponent } from './eye-track/component/heatmap/heatmap.component';
 import { EyeTrackButtonDirective } from './decorators/directive/button-decorator';
 import { EyeTrackSelectDirective } from './decorators/directive/select-decorator';
+import { EyeScrollComponent } from './decorators/component/eye-scroll.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { EyeTrackSelectDirective } from './decorators/directive/select-decorator
     TrainAppPage,
     CameraComponent,
     EyeTargeComponent,
-    HeatMapComponent,    
+    HeatMapComponent,
+    EyeScrollComponent,
     EyeTrackButtonDirective,
     EyeTrackSelectDirective
   ],
@@ -28,7 +30,8 @@ import { EyeTrackSelectDirective } from './decorators/directive/select-decorator
   ],
   providers: [
     EyeTrackButtonDirective,
-    EyeTrackSelectDirective
+    EyeTrackSelectDirective,
+    EyeScrollComponent
   ],
   bootstrap: [AppComponent]
 })

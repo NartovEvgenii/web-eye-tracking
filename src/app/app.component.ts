@@ -15,7 +15,6 @@ export class AppComponent  implements OnInit,AfterViewInit  {
   startEyeTracking: boolean=true;
 
   constructor(private renderer: Renderer2,
-              private butDir: EyeTrackButtonDirective,
               private currentTrainData: CurrentTrainData,
               private eyeTrack: EyeTrack
   ){}
