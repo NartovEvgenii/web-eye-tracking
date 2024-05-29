@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import { CurrentTrainData } from 'src/app/features.service/currentTrainData';
-import { DatasetService } from 'src/app/features.service/dataset';
-import { EyeTrack } from 'src/app/features.service/eyeTrack';
+import { CurrentTrainData } from 'src/app/eye-track/features.service/currentTrainData';
+import { DatasetService } from 'src/app/eye-track/features.service/dataset';
+import { EyeTrack } from 'src/app/eye-track/features.service/eyeTrack';
 
 declare var clm: any;
 
@@ -61,7 +61,7 @@ export class CameraComponent implements OnInit {
   
   }
 
-  private gumSuccess(stream: MediaStream) {  
+  private gumSuccess(stream: MediaStream) {      
       // add camera stream if getUserMedia succeeded
       if ('srcObject' in this.video) {
         this.video.srcObject = stream;
@@ -104,7 +104,7 @@ export class CameraComponent implements OnInit {
           this.setCurrData();
         }
         if(this.eyeTrack.startTracking$.value){
-          this.updateEyeTrackPosition();
+          this.updateEyeTrackPosition(currentPosition);
         }
         this.ctrack.draw(this.overlay);
       }
@@ -133,7 +133,8 @@ export class CameraComponent implements OnInit {
         this.eyesCanvas.height,
       );
       this.oneEyeCtx.putImageData(this.imageToYCbCr(
-                                  this.eyesCtx.getImageData(0, 0, this.eyesCanvas.width / 2, this.eyesCanvas.height)), 
+                                  this.eyesCtx.getImageData(0, 0, this.eyesCanvas.width, this.eyesCanvas.height), 
+                                  position), 
       0, 0);
       const img = this.overlay as HTMLCanvasElement;
       this.currentTrainData.fullimage = img.toDataURL("image/png");
@@ -176,7 +177,7 @@ export class CameraComponent implements OnInit {
       this.currentTrainData.image = this.eyesCanvas;
     }
 
-    private updateEyeTrackPosition(){
+    private updateEyeTrackPosition(position:any){
       let x = this.currentEyeRect[0] + this.currentEyeRect[2] / 2;
       let y = this.currentEyeRect[1] + this.currentEyeRect[3] / 2;
   
@@ -188,10 +189,10 @@ export class CameraComponent implements OnInit {
 
       const metaInfos = this.datasetService.getMetaInfos(x, y, rectWidthEye, rectHeightEye);
       const image = this.eyesCanvas;
-      this.eyeTrack.updatePosition(image, metaInfos);
+      this.eyeTrack.updatePosition(image, metaInfos, position, this.currentEyeRect);
     }
 
-   public imageToYCbCr(imageData:any){
+   public imageToYCbCr(imageData:any, position:any){    
     const data = imageData.data;
     let black = 0;
     let white = 0;
@@ -206,8 +207,8 @@ export class CameraComponent implements OnInit {
       const Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B;
   
       const avg = (Y + Cb + Cr) / 3;
-      const color = avg > 110 ? 255 : 0;
-      if (avg > 110) {
+      const color = avg > 115 ? 255 : 0;
+      if (avg > 115) {
         black++;
       } else {
         white++;
@@ -216,8 +217,68 @@ export class CameraComponent implements OnInit {
       data[i + 1] = color;
       data[i + 2] = color;
     }
-    console.log("PERCENT " + (black * 100 / (white + black)));
+    this.drawRedEyes(imageData, position);
     return imageData;
    }
+
+   private drawRedEyes(imageData:any, position:any) {
+    const minX = position[24][0] - this.currentEyeRect[0] - 7;
+    const minY = position[24][1] - this.currentEyeRect[1];
+
+    const eyeX = position[27][0] - this.currentEyeRect[0] - 7;
+    const eyeY = position[27][1] - this.currentEyeRect[1];
+    
+    const maxX = position[26][0] - this.currentEyeRect[0] - 7;
+    const maxY = position[26][1] - this.currentEyeRect[1];
+    let percent = 0;
+    percent += this.drawRedLine(imageData, minX, minY, eyeX, eyeY);
+    percent += this.drawRedLine(imageData, eyeX, eyeY, maxX, maxY);
+    // console.log("PERCENT   " + percent);
+   }
+
+  private drawRedLine(imageData:any, x1:any, y1:any, x2:any, y2:any) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var length = Math.max(Math.abs(dx), Math.abs(dy));
+    let percent = 0;
+    for (var i = 0; i <= length; i++) {
+      var x = x1 + i / length * dx;
+      var y = y1 + i / length * dy;
+      percent += this.setRedPixel(imageData, Math.round(x), Math.round(y));
+    }
+    return percent / length;
+  }
+
+  private setRedPixel(imageData:any, x:any, y:any) {
+    let black = 0;
+    let white = 0;
+    for (var i = -1; i <= 1; i++) {
+      for (var j = -1; j <= 1; j++) {
+        var index = ((y + j) * imageData.width + x + i) * 4;
+        if (115 > this.getAvgColor(imageData.data, index)) {
+          black++;
+        } else {
+          white++;
+        }
+        imageData.data[index] = 255;
+        imageData.data[index + 1] = 0;
+        imageData.data[index + 2] = 0;
+      }
+    }
+    return black * 100 / (white + black);
+  }
+
+  private getAvgColor(imageData:any, index:number) {
+    const R = imageData[index];
+    const G = imageData[index + 1];
+    const B = imageData[index + 2];
+
+    // Convert RGB to YCbCr
+    const Y = 0.299 * R + 0.587 * G + 0.114 * B;
+    const Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B;
+    const Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B;
+
+    return (Y + Cb + Cr) / 3;
+  }
 
 }

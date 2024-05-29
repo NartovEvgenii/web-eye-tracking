@@ -10,5 +10,10 @@
   ],
   "include": [
     "src/**/*.d.ts"
-  ]
+  ],
+  "detectiveOptions" : {
+    "ts" : {
+      "mixedImports" : true 
+    }
+ } 
 }

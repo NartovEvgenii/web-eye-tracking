@@ -3,28 +3,33 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CameraComponent } from './component/camera/camera.component';
-import { TrainTargeComponent } from './component/train-target/train-target.component';
-import { HomePage } from './page/home/home.page';
+import { TrainAppPage } from './eye-track/train/trainApp.page';
 import {MatButtonModule} from '@angular/material/button';
-import { EyeTargeComponent } from './component/eye-target/eye-target.component';
-import { HeatMapComponent } from './component/heatmap/heatmap.component';
+import { CameraComponent } from './eye-track/component/camera/camera.component';
+import { EyeTargeComponent } from './eye-track/component/eye-target/eye-target.component';
+import { HeatMapComponent } from './eye-track/component/heatmap/heatmap.component';
+import { EyeTrackButtonDirective } from './decorators/directive/button-decorator';
+import { EyeTrackSelectDirective } from './decorators/directive/select-decorator';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomePage,
+    TrainAppPage,
     CameraComponent,
-    TrainTargeComponent,
     EyeTargeComponent,
-    HeatMapComponent
+    HeatMapComponent,    
+    EyeTrackButtonDirective,
+    EyeTrackSelectDirective
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     MatButtonModule
   ],
-  providers: [],
+  providers: [
+    EyeTrackButtonDirective,
+    EyeTrackSelectDirective
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

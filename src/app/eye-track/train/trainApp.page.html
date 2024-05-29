@@ -1,0 +1,56 @@
+<div *ngIf="showHeatMap">    
+    <heatmap></heatmap>
+</div>
+<div *ngIf="startEyeTracking">    
+    <eye-target></eye-target>
+</div>
+<div *ngIf="!showInterface" class="row h-100 w-100">
+    <div class="col-2 col-md-auto align-self-end" >            
+        <div class="row" hidden>    
+            <button class="col m-1" (click)="saveImage()" color="primary" mat-raised-button>Image</button>
+            <button class="col m-1 heatMapButton" (click)="showHeatMapevent()" color="primary" mat-raised-button>Тепловая карта</button> 
+        </div>                    
+        <div class="row" >    
+            <button class="col m-1" (click)="createDataset()" color="primary" mat-raised-button>Начать обучение</button>   
+            <button class="col m-1" (click)="fitModel()" color="primary" mat-raised-button>Обучить модель</button> 
+            <button class="col m-1" (click)="showTarget()" color="primary" mat-raised-button>Таргет</button> 
+        </div>
+        <div class="row" hidden>    
+            <button class="col m-1" (click)="saveDataset()" color="primary" mat-raised-button>Сохранить датасет</button>
+            <label for="myfile1" class="fileInputL col  m-1" >Загрузить датасет</label>
+            <input type="file" id="myfile1" class="hiddenInput" (change)="loadDataset($event)" #fileUpload>
+        </div>
+        <div class="row" >    
+            <button class="col m-1" (click)="saveModel()" color="primary" mat-raised-button>Сохранить модель</button>
+            <label for="myfile2" class="fileInputL col  m-1" >Загрузить модель</label>
+            <input type="file" id="myfile2" class="hiddenInput" (change)="loadModel($event)" multiple>
+        </div>
+        <div class="row"> 
+            <camera></camera>               
+        </div> 
+    </div>
+    <div class="col-6 m-2">
+        <div class="row">
+            <div class="col">
+                <button (click)="increaseBtn1()" class="btn btn-primary me-2" color="primary" mat-raised-button eyeTrackButton>Кнопка для глаза</button>
+                <h4>Кнопка 1: {{btn1Count}}</h4>
+            </div>
+            <div class="col">
+                <button (click)="increaseBtn2()">Кнопка для глаза</button>
+                <h4>Кнопка 2: {{btn2Count}}</h4>
+            </div>
+        </div>
+        <div class="row m-2">
+            <select>
+            <option>Значение 1</option>
+            <option>Значение 2</option>
+            <option>Значение 3</option>
+            <option>Значение 4</option>
+            <option>Значение 5</option>
+            <option>Значение 6</option>
+            <option>Значение 7</option>
+            </select>
+            <h2>Здесь очень интересный текст</h2>
+        </div>
+    </div>        
+</div>

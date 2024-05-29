@@ -1,16 +1,21 @@
 import {Component, HostListener, OnInit} from '@angular/core';
-import { CurrentTrainData } from 'src/app/features.service/currentTrainData';
-import { DatasetService } from 'src/app/features.service/dataset';
-import { EyeTrackModel } from 'src/app/features.service/eyeTrackModel';
+import { CurrentTrainData } from 'src/app/eye-track/features.service/currentTrainData';
+import { DatasetService } from 'src/app/eye-track/features.service/dataset';
+import { EyeTrackModel } from 'src/app/eye-track/features.service/eyeTrackModel';
+
+export enum KeyCodes {
+  LEFT = 37,
+  SPACE = 32
+}
 
 @Component({
-    selector: 'home',
-    templateUrl: './home.page.html',
-    styleUrls: ['./home.page.scss']
+    selector: 'trainApp',
+    templateUrl: './trainApp.page.html',
+    styleUrls: ['./trainApp.page.scss']
   })
-export class HomePage implements OnInit {
+export class TrainAppPage implements OnInit {
 
-  startTraining: boolean=false;
+  showInterface: boolean=true;
   startEyeTracking: boolean=false;
   showHeatMap: boolean=false;
   addDataIntervalId: any;
@@ -18,6 +23,9 @@ export class HomePage implements OnInit {
   
   clientX: number=0;  
   clientY: number=0;
+
+  btn1Count: number=0;
+  btn2Count: number=0;
 
   constructor(
     private readonly datasetservice: DatasetService,
@@ -33,10 +41,15 @@ export class HomePage implements OnInit {
 
   @HostListener('document:keyup', ['$event'])
   handleKeyboardEvent(event: any) {
-      this.currentTrainData.targetX = this.clientX;
-      this.currentTrainData.targetY = this.clientY;
-      
-      this.addDataToDataset();    
+      if (event.code == "Space" ||      
+          event.keyCode == KeyCodes.SPACE) {
+        this.currentTrainData.targetX = this.clientX;
+        this.currentTrainData.targetY = this.clientY;      
+        this.addDataToDataset();
+      }
+      if (event.keyCode == KeyCodes.LEFT) {
+        this.showInterface = !this.showInterface;
+      }
   }
 
   ngOnInit(): void {
@@ -44,13 +57,11 @@ export class HomePage implements OnInit {
   }
 
   createDataset() {
-    this.startTraining = true;
     this.currentTrainData.startTraining = true;
     this.addDataIntervalId = setInterval(() => this.addDataToDataset(), 500);
     this.currentTrainData.startTraining$
                 .subscribe((val) => {
                   if(!val){
-                    this.startTraining = false;
                     clearInterval(this.addDataIntervalId);
                   }
                 });
@@ -100,6 +111,18 @@ export class HomePage implements OnInit {
 
 saveModel() {
   this.eyeTrackModel.currentModel?.save('downloads://model');
+}
+
+printText() {
+  console.log("click");
+}
+
+increaseBtn1() {
+  this.btn1Count += 1;
+}
+
+increaseBtn2() {
+  this.btn2Count += 1;
 }
 
 loadModel(event:any) {

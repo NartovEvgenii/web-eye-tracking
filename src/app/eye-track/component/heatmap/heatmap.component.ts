@@ -1,6 +1,6 @@
 import {Component, ElementRef, HostBinding, OnInit, ViewChild} from '@angular/core';
-import { DatasetService } from 'src/app/features.service/dataset';
-import { EyeTrackModel } from 'src/app/features.service/eyeTrackModel';
+import { DatasetService } from 'src/app/eye-track/features.service/dataset';
+import { EyeTrackModel } from 'src/app/eye-track/features.service/eyeTrackModel';
 
 @Component({
     selector: 'heatmap',
