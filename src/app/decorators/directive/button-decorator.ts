@@ -1,10 +1,11 @@
 import { Directive, ElementRef, Renderer2 } from '@angular/core';
-import { EyeTrack } from 'src/app/eye-track/features.service/eyeTrack';
+import { TrackAssistent } from 'src/app/eye-track/features.service/trackAssistent';
+import { EyetrackDecoratorI } from './interface-decorator';
 
 @Directive({
   selector: '[eyeTrackButton]'
 })
-export class EyeTrackButtonDirective {
+export class EyeTrackButtonDirective implements EyetrackDecoratorI{
 
   private minWidth: number = 50;
   private minHeight: number = 50;
@@ -15,8 +16,21 @@ export class EyeTrackButtonDirective {
 
   constructor(private elementRef: ElementRef,
               private renderer: Renderer2,
-              private eyeTrack: EyeTrack){
-    this.apply();
+              private eyeTrackAssist: TrackAssistent){}
+
+  injectElement(rootElement: any, renderer: Renderer2, eyeTrackAssist: TrackAssistent): void {
+    const buttons = rootElement.querySelectorAll('button');
+    buttons.forEach((button: any) => {
+      const elementRef = new ElementRef(button);
+      let dir = new EyeTrackButtonDirective(elementRef, renderer, eyeTrackAssist);
+      try {
+        dir.apply();
+      }
+      catch(e:any){
+        console.log('Exception')
+        console.log(e)
+      }     
+    });
   }
 
   private apply() {
@@ -30,9 +44,11 @@ export class EyeTrackButtonDirective {
     }
     this.originBorder = this.elementRef.nativeElement.style.border;
     this.createProgressBar();
-    this.eyeTrack.target$
+    this.eyeTrackAssist.target$
       .subscribe((point) => {
         const rect = this.elementRef.nativeElement.getBoundingClientRect();
+        console.log(this.elementRef.nativeElement)
+        console.log(this.elementRef.nativeElement.getBoundingClientRect())
         let minLeft = rect.left - 5;
         let minTop = rect.top - 5;
         let maxLeft = rect.left + rect.width + 5;
@@ -41,6 +57,8 @@ export class EyeTrackButtonDirective {
             minTop < point.y && point.y < maxTop) {
             if (!this.eyeTarget) {
               this.renderer.setStyle(this.elementRef.nativeElement, 'border', '4px solid green');
+              this.parenArea.style.top = (rect.top) + 'px';
+              this.parenArea.style.left = rect.left + 'px';
             }
             this.eyeTarget = true;
         } else {
@@ -50,7 +68,7 @@ export class EyeTrackButtonDirective {
           this.eyeTarget = false;
         }
       });     
-    this.eyeTrack.closeRightEye$
+    this.eyeTrackAssist.closeRightEye$
       .subscribe((value) => {
         if (value && this.eyeTarget) {
           this.updateProgressBar();
@@ -58,6 +76,7 @@ export class EyeTrackButtonDirective {
           this.hideProgressBar();
         }
       });
+      this.eyeTrackAssist.currentElements.push(this.elementRef);
   }
 
   private createProgressBar() {    
@@ -65,12 +84,10 @@ export class EyeTrackButtonDirective {
     this.parenArea = document.createElement('div');
     this.parenArea.style.paddingLeft = '0px';
     this.parenArea.style.position = 'fixed';
-    this.parenArea.style.top = rect.top + 'px';
-    this.parenArea.style.left = rect.left + 'px';
     this.parenArea.style.width = (this.elementRef.nativeElement.offsetWidth) + 'px';
     this.parenArea.style.height = '15px';
     this.parenArea.style.zIndex = 99;
-    //this.parenArea.hidden = true;
+    this.parenArea.hidden = true;
 
     this.progress = this.renderer.createElement('progress');
     this.progress.style.width = (this.elementRef.nativeElement.offsetWidth) + 'px';     
@@ -81,7 +98,8 @@ export class EyeTrackButtonDirective {
     this.progress.value = 1;
 
     this.parenArea.appendChild(this.progress);
-    this.renderer.insertBefore(this.elementRef.nativeElement.parentNode, this.parenArea, this.elementRef.nativeElement.nextSibling);
+    this.elementRef.nativeElement.appendChild(this.parenArea);
+    //this.renderer.insertBefore(this.elementRef.nativeElement, this.parenArea, this.elementRef.nativeElement.nextSibling);
   }
 
   private updateProgressBar() {
@@ -99,7 +117,7 @@ export class EyeTrackButtonDirective {
 
   private hideProgressBar() {
     this.progress.value = 1;
-    //this.parenArea.hidden = true;
+    this.parenArea.hidden = true;
   }
 
 }

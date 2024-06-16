@@ -1,5 +1,6 @@
 import {Component, ElementRef, HostBinding, OnInit, Renderer2, ViewChild} from '@angular/core';
-import { EyeTrack } from 'src/app/eye-track/features.service/eyeTrack';
+import { TrackAssistent } from 'src/app/eye-track/features.service/trackAssistent';
+
 
 @Component({
     selector: 'eye-scroll',
@@ -20,14 +21,12 @@ export class EyeScrollComponent implements OnInit {
   @ViewChild('eyeUpScroll', {static: true})
   eyeUpScroll!: ElementRef;
 
-  constructor(private eyeTrack: EyeTrack
+  constructor(private eyeTrackAssist: TrackAssistent
   ) { }
 
   ngOnInit(): void {
-    this.eyeTrack.startTracking = true;
-    this.eyeTrack.target$
+    this.eyeTrackAssist.target$
         .subscribe((point) => {
-          console.log("window.scrollY " + window.scrollY)
           if (point.y > window.innerHeight - 50 || point.y < 50) {
             if (point.y < 50 && window.scrollY > 0) {
               this.eyeUpScroll.nativeElement.style.border = '4px solid MidnightBlue';
@@ -50,7 +49,7 @@ export class EyeScrollComponent implements OnInit {
             this.eyeTargetHeight = undefined;
           }
         });
-    this.eyeTrack.closeRightEye$
+    this.eyeTrackAssist.closeRightEye$
     .subscribe((value) => {
       if (this.eyeTargetHeight != undefined && value) {
         if (this.eyeTargetHeight > window.innerHeight - 50) {

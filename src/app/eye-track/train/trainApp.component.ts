@@ -2,23 +2,28 @@ import {Component, HostListener, OnInit} from '@angular/core';
 import { CurrentTrainData } from 'src/app/eye-track/features.service/currentTrainData';
 import { DatasetService } from 'src/app/eye-track/features.service/dataset';
 import { EyeTrackModel } from 'src/app/eye-track/features.service/eyeTrackModel';
+import { EyeTrack } from '../features.service/eyeTrack';
 
 export enum KeyCodes {
   LEFT = 37,
-  SPACE = 32
+  RIGHT = 39,
+  SPACE = 32,
+  O = 79,
+  P = 80
 }
 
 @Component({
     selector: 'trainApp',
-    templateUrl: './trainApp.page.html',
-    styleUrls: ['./trainApp.page.scss']
+    templateUrl: './trainApp.component.html',
+    styleUrls: ['./trainApp.component.scss']
   })
-export class TrainAppPage implements OnInit {
+export class TrainAppComponent implements OnInit {
 
   showInterface: boolean=true;
   startEyeTracking: boolean=false;
   showHeatMap: boolean=false;
   addDataIntervalId: any;
+  startTrainData: boolean=false;
 
   
   clientX: number=0;  
@@ -35,21 +40,26 @@ export class TrainAppPage implements OnInit {
   }
 
   @HostListener('mousemove', ['$event']) onMouseMove(event: { clientX: any; clientY: any; }) {
-      this.clientX = event.clientX / window.innerWidth;
-      this.clientY = event.clientY / window.innerHeight; 
+      this.currentTrainData.targetX = event.clientX / window.innerWidth;
+      this.currentTrainData.targetY = event.clientY / window.innerHeight;     
   }
 
   @HostListener('document:keyup', ['$event'])
   handleKeyboardEvent(event: any) {
-      if (event.code == "Space" ||      
-          event.keyCode == KeyCodes.SPACE) {
-        this.currentTrainData.targetX = this.clientX;
-        this.currentTrainData.targetY = this.clientY;      
-        this.addDataToDataset();
-      }
-      if (event.keyCode == KeyCodes.LEFT) {
-        this.showInterface = !this.showInterface;
-      }
+    if (event.keyCode == KeyCodes.RIGHT) {
+      this.currentTrainData.targetX = this.clientX;
+      this.currentTrainData.targetY = this.clientY;      
+      this.addDataToDataset();
+    }
+    if (event.keyCode == KeyCodes.LEFT) {
+      this.showInterface = !this.showInterface;
+    }
+    if (event.keyCode == KeyCodes.O) {
+      this.saveModel();
+    }
+    if (event.keyCode == KeyCodes.P) {
+      this.fitModel();
+    }
   }
 
   ngOnInit(): void {
@@ -58,13 +68,6 @@ export class TrainAppPage implements OnInit {
 
   createDataset() {
     this.currentTrainData.startTraining = true;
-    this.addDataIntervalId = setInterval(() => this.addDataToDataset(), 500);
-    this.currentTrainData.startTraining$
-                .subscribe((val) => {
-                  if(!val){
-                    clearInterval(this.addDataIntervalId);
-                  }
-                });
   }
 
   private addDataToDataset() {
@@ -128,6 +131,8 @@ increaseBtn2() {
 loadModel(event:any) {
   const file1:File = event.target.files[0];
   const file2:File = event.target.files[1];
+  console.log(file1);
+  console.log(file2);
   if (file1 && file2) {
     this.eyeTrackModel.loadModel(file1, file2);
   }

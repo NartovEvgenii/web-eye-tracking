@@ -3,9 +3,7 @@ import { DatasetService } from "./dataset";
 import * as tf from '@tensorflow/tfjs';
 import { LayersModel, SymbolicTensor } from "@tensorflow/tfjs";
 
-@Injectable({
-    providedIn: 'root',
-   })
+@Injectable()
 export class EyeTrackModel {
     currentModel: LayersModel | null = null;
     epochsTrained: number = 0
@@ -26,14 +24,11 @@ export class EyeTrackModel {
       let bestEpoch = -1;
       let bestTrainLoss = Number.MAX_SAFE_INTEGER;
       let bestValLoss = Number.MAX_SAFE_INTEGER;
-      const bestModelPath = 'localstorage://best-model';
-  
+      const bestModelPath = 'localstorage://best-model';  
       this.currentModel!.compile({
         optimizer: tf.train.adam(0.0005),
         loss: 'meanSquaredError',
       });
-      console.log("ok");
-
       let epochsTrained = this.epochsTrained;
       let currentModel = this.currentModel;
   
@@ -45,26 +40,23 @@ export class EyeTrackModel {
         callbacks: {
           onEpochEnd: async function(epoch, logs) {
             console.info('Epoch', epoch, 'losses:', logs);
-            epochsTrained += 1;
-  
+            epochsTrained += 1;  
             if (logs != undefined &&  logs["val_loss"] < bestValLoss) {
               console.log("model save");
               bestEpoch = epoch;
               bestTrainLoss = logs["loss"];
               bestValLoss = logs["val_loss"];
               await currentModel.save(bestModelPath);
-            }
-  
+            }  
             return await tf.nextFrame();
           },
           onTrainEnd: async function() {
-            console.info('Finished training');
-  
+            console.info('Finished training');  
             epochsTrained -= epochs - bestEpoch;
-            console.info('Loading best epoch:', epochsTrained);
-  
-            currentModel = await tf.loadLayersModel(bestModelPath);
-  
+            console.info('best epoch:', epochsTrained);
+            console.info('bestTrainLoss:', bestTrainLoss);
+            console.info('bestValLoss:', bestValLoss); 
+            currentModel = await tf.loadLayersModel(bestModelPath);  
           },
         },
       });
@@ -78,8 +70,7 @@ export class EyeTrackModel {
       const inputMeta = tf.input({
         name: 'metaInfos',
         shape: [4],
-      });
-  
+      });  
       const conv = tf.layers
         .conv2d({
           kernelSize: 5,
@@ -88,21 +79,16 @@ export class EyeTrackModel {
           activation: 'relu',
           kernelInitializer: 'varianceScaling',
         })
-        .apply(inputImage);
-  
+        .apply(inputImage);  
       const maxpool = tf.layers
         .maxPooling2d({
           poolSize: [2, 2],
           strides: [2, 2],
         })
-        .apply(conv);
-  
-      const flat = tf.layers.flatten().apply(maxpool);
-  
-      const dropout = tf.layers.dropout({rate: 0.2}).apply(flat) as SymbolicTensor;
-  
-      const concat = tf.layers.concatenate().apply([dropout, inputMeta]);
-  
+        .apply(conv);  
+      const flat = tf.layers.flatten().apply(maxpool);  
+      const dropout = tf.layers.dropout({rate: 0.2}).apply(flat) as SymbolicTensor;  
+      const concat = tf.layers.concatenate().apply([dropout, inputMeta]);  
       const output = tf.layers 
         .dense({
           units: 2,
@@ -114,8 +100,7 @@ export class EyeTrackModel {
       const model = tf.model({
         inputs: [inputImage, inputMeta],
         outputs: output,
-      });
-  
+      });  
       return model;
     }
 

@@ -1,5 +1,6 @@
 import {Component, ElementRef, HostBinding, OnInit, Renderer2, ViewChild} from '@angular/core';
-import { EyeTrack } from 'src/app/eye-track/features.service/eyeTrack';
+import { TrackAssistent } from '../../features.service/trackAssistent';
+
 
 @Component({
     selector: 'eye-target',
@@ -17,16 +18,15 @@ export class EyeTargeComponent implements OnInit {
 
   @ViewChild('eyetarget', {static: true})
   target!: ElementRef;
-  constructor(private eyeTrack: EyeTrack,
+  constructor(private eyeTrack: TrackAssistent,
               private renderer: Renderer2
   ) { }
 
   ngOnInit(): void {
-    this.eyeTrack.startTracking = true;
     this.eyeTrack.target$
         .subscribe((point) => {
           this.left = Math.max(0, point.x - 20);
-          this.top = Math.max(0, Math.min(point.y - 20, window.innerHeight));
+          this.top = Math.max(0, point.y - 20 + window.scrollY);
         });
     this.eyeTrack.closeRightEye$
         .subscribe((val) => {

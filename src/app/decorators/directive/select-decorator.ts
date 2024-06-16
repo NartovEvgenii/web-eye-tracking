@@ -1,10 +1,11 @@
 import { Directive, ElementRef, Renderer2 } from '@angular/core';
-import { EyeTrack } from 'src/app/eye-track/features.service/eyeTrack';
+import { TrackAssistent } from 'src/app/eye-track/features.service/trackAssistent';
+import { EyetrackDecoratorI } from './interface-decorator';
 
 @Directive({
   selector: '[eyeTrackSelect]'
 })
-export class EyeTrackSelectDirective {
+export class EyeTrackSelectDirective implements EyetrackDecoratorI{
 
   private minWidth: number = 100;
   private minHeight: number = 50;
@@ -28,8 +29,21 @@ export class EyeTrackSelectDirective {
 
   constructor(private elementRef: ElementRef,
       private renderer: Renderer2,
-      private eyeTrack: EyeTrack){
-    this.apply();
+      private eyeTrackAssist: TrackAssistent){ }
+
+  injectElement(rootElement: any, renderer: Renderer2, eyeTrackAssist: TrackAssistent): void {
+    const selects = rootElement.querySelectorAll('select');
+    selects.forEach((select: any) => {
+      const elementRef = new ElementRef(select);
+      let dir = new EyeTrackSelectDirective(elementRef, renderer, eyeTrackAssist);
+      try {
+        dir.apply();
+      }
+      catch(e:any){
+        console.log('Exception')
+        console.log(e)
+      }
+    });
   }
 
   private apply() {
@@ -43,7 +57,7 @@ export class EyeTrackSelectDirective {
     this.createOptionsArea();
     this.createProgressBar();
     this.lastMaxTop = this.getLastMaxTop();
-    this.eyeTrack.target$
+    this.eyeTrackAssist.target$
       .subscribe((point) => {
         const rect = this.elementRef.nativeElement.getBoundingClientRect();
         let minLeft = rect.left - 5;
@@ -78,7 +92,7 @@ export class EyeTrackSelectDirective {
           this.eyeTargetHeight = undefined;
         }
       });     
-    this.eyeTrack.closeRightEye$
+    this.eyeTrackAssist.closeRightEye$
       .subscribe((value) => {
         const rect = this.elementRef.nativeElement.getBoundingClientRect();
         let firstMaxTop = rect.bottom;
@@ -103,7 +117,10 @@ export class EyeTrackSelectDirective {
           this.cancelDownElement();
           this.cancelUpElement();
         }
-      });
+      });      
+    this.eyeTrackAssist.currentElements.push(this.elementRef);
+    this.eyeTrackAssist.currentElements.push(new ElementRef(this.upElement));
+    this.eyeTrackAssist.currentElements.push(new ElementRef(this.downElement));
   }
 
   private createProgressBar() {
@@ -117,7 +134,7 @@ export class EyeTrackSelectDirective {
     this.parenArea.style.width = (this.elementRef.nativeElement.offsetWidth) + 'px';
     this.parenArea.style.height = '15px';
     this.parenArea.style.zIndex = 99;
-    //this.parenArea.hidden = true;
+    this.parenArea.hidden = true;
 
     this.progress = this.renderer.createElement('progress');
     this.progress.style.width = (this.elementRef.nativeElement.offsetWidth) + 'px';     
@@ -148,7 +165,7 @@ export class EyeTrackSelectDirective {
 
   private hideProgressBar() {
     this.progress.value = 1;
-    //this.parenArea.hidden = true;
+    this.parenArea.hidden = true;
   }
 
   private createOptionsArea() {
@@ -161,7 +178,7 @@ export class EyeTrackSelectDirective {
     this.parentOptionsArea.style.left = rect.left + 'px';
     this.parentOptionsArea.style.zIndex = 99;
     this.parentOptionsArea.style.width = (this.elementRef.nativeElement.offsetWidth) + 'px';
-    //this.parentOptionsArea.hidden = true;
+    this.parentOptionsArea.hidden = true;
 
     let downArea = this.createDownArea();
     this.parentOptionsArea.appendChild(downArea);

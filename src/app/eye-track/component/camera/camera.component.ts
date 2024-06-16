@@ -35,8 +35,8 @@ export class CameraComponent implements OnInit {
     this.eyesCanvas = document.getElementById('eyes') as HTMLCanvasElement;
     this.eyesCtx = this.eyesCanvas.getContext('2d', { willReadFrequently: true });
 
-    let oneeyeCanvas = document.getElementById('oneeye') as HTMLCanvasElement;
-    this.oneEyeCtx = oneeyeCanvas.getContext('2d', { willReadFrequently: true });
+    let blackEyeCanvas = document.getElementById('blackEye') as HTMLCanvasElement;
+    this.oneEyeCtx = blackEyeCanvas.getContext('2d', { willReadFrequently: true });
 
     this.datasetService.eyeWidth = this.eyesCanvas.width;
     this.datasetService.eyeHeight = this.eyesCanvas.height;
@@ -136,8 +136,6 @@ export class CameraComponent implements OnInit {
                                   this.eyesCtx.getImageData(0, 0, this.eyesCanvas.width, this.eyesCanvas.height), 
                                   position), 
       0, 0);
-      const img = this.overlay as HTMLCanvasElement;
-      this.currentTrainData.fullimage = img.toDataURL("image/png");
     }
 
     private getEyesRect(position:any) {
@@ -196,17 +194,8 @@ export class CameraComponent implements OnInit {
     const data = imageData.data;
     let black = 0;
     let white = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const R = data[i];
-      const G = data[i + 1];
-      const B = data[i + 2];
-  
-      // Convert RGB to YCbCr
-      const Y = 0.299 * R + 0.587 * G + 0.114 * B;
-      const Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B;
-      const Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B;
-  
-      const avg = (Y + Cb + Cr) / 3;
+    for (let i = 0; i < data.length; i += 4) {  
+      const avg = this.getAvgColor(data, i);
       const color = avg > 115 ? 255 : 0;
       if (avg > 115) {
         black++;

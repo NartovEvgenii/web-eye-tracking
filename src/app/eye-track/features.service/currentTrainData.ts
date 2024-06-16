@@ -1,9 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 
-@Injectable({
-    providedIn: 'root',
-   })
+@Injectable()
 export class CurrentTrainData {
 
     startTraining$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);

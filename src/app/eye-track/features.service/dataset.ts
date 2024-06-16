@@ -9,10 +9,8 @@ interface DataItem {
   y: Tensor<Rank> | null;
 }
 
-@Injectable({
-    providedIn: 'root'
-  })
-  export class DatasetService {    
+@Injectable()
+export class DatasetService {    
 
     train: DataItem  = {n: 0,x: null,y: null };
 

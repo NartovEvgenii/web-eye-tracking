@@ -17,7 +17,7 @@ class Point {
     providedIn: 'root',
    })
 export class EyeTrack {
-    startTracking$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    startTracking$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
 
     maxWidth:number  = window.innerWidth;
     maxHeight:number  = window.innerHeight;
@@ -35,6 +35,7 @@ export class EyeTrack {
     }
 
     public async updatePosition(image: HTMLCanvasElement, metaInfos: Tensor<Rank>, position:any, rect:any){
+      
         this.checkCloseRightEye(image.getContext('2d')?.getImageData(0, 0, image.width, image.height), position, rect);
         this.checkCloseLeftEye(image.getContext('2d')?.getImageData(image.width / 2, 0, image.width / 2, image.height));
         const batchImage = this.datasetService.batchImage(image);
@@ -56,6 +57,7 @@ export class EyeTrack {
 
         // this.left$.next(predictionData[0]  * this.maxWidth);
         // this.top$.next(predictionData[1] * this.maxHeight);
+      
     }
     
     public set startTracking(value: boolean) {
@@ -65,10 +67,8 @@ export class EyeTrack {
     private async checkCloseRightEye(imageData:any, position:any, rect:any){        
         const minX = position[24][0] - rect[0] - 7;
         const minY = position[24][1] - rect[1];
-
         const eyeX = position[27][0] - rect[0] - 7;
-        const eyeY = position[27][1] - rect[1];
-        
+        const eyeY = position[27][1] - rect[1];        
         const maxX = position[26][0] - rect[0] - 7;
         const maxY = position[26][1] - rect[1];
         let percent = 0;
@@ -110,7 +110,7 @@ export class EyeTrack {
     for (var i = -1; i <= 1; i++) {
       for (var j = -1; j <= 1; j++) {
         var index = ((y + j) * imageData.width + x + i) * 4;
-        if (115 > this.getAvgColor(imageData.data, index)) {
+        if (115 > this.getAvgYCbCrColor(imageData.data, index)) {
           black++;
         } else {
           white++;
@@ -120,16 +120,14 @@ export class EyeTrack {
     return black * 100 / (white + black);
   }
 
-  private getAvgColor(imageData:any, index:number) {
+  private getAvgYCbCrColor(imageData:any, index:number) {
     const R = imageData[index];
     const G = imageData[index + 1];
     const B = imageData[index + 2];
-
     // Convert RGB to YCbCr
     const Y = 0.299 * R + 0.587 * G + 0.114 * B;
     const Cb = 128 - 0.168736 * R - 0.331264 * G + 0.5 * B;
     const Cr = 128 + 0.5 * R - 0.418688 * G - 0.081312 * B;
-
     return (Y + Cb + Cr) / 3;
   }
     
